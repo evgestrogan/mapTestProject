@@ -4,8 +4,7 @@
       <template v-slot:extension>
         <v-tabs v-model="tab" align-with-title dark>
           <v-tabs-slider color="red"></v-tabs-slider>
-
-          <v-tab :to="{ name: 'Home' }">
+          <v-tab :to="{ name: 'MapPage' }">
             Map
           </v-tab>
           <v-tab :to="{ name: 'About' }">
@@ -29,7 +28,10 @@ export default {
   name: 'App',
   data: () => ({
       tab: null,
-
   }),
 };
 </script>
+
+<style>
+
+</style>
