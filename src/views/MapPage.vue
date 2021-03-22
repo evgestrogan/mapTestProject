@@ -1,74 +1,80 @@
 <template>
 
-  <div class="mappage" style="height: 100%">
+    <div class="mappage" style="height: 100%">
 
-    <v-navigation-drawer app apppermanent expand-on-hover mini-variant-width="5" width="50%">
-      <v-row style="height: 100%;overflow: hidden">
-        <v-col style="overflow-y: scroll; height: 100%">
-          <v-card-text style="overflow: auto">
-            <v-treeview
-              v-model="selection"
-              :items="items"
-              selected-color="green darken-4"
-              open-on-click
-              selectable
-              return-object
-              expand-icon="mdi-chevron-down"
-              on-icon="mdi-bookmark"
-              off-icon="mdi-bookmark-outline"
-              indeterminate-icon="mdi-bookmark-minus"
-            >
-            </v-treeview>
-          </v-card-text>
-        </v-col>
-
-        <v-divider vertical></v-divider>
-
-        <v-col cols="12" md="6">
-          <v-card-text class="sticky">
-            <div v-if="selection.length === 0" key="title" class="title font-weight-light grey--text pa-4 text-center">
-              Select your favorite breweries
-            </div>
-            <div v-else key="title" class="title font-weight-light grey--text pa-4 text-center">
-              Your favorite breweries
-            </div>
-            <v-scroll-x-transition group hide-on-leave>
-              <v-chip
-                v-for="(select, i) in selection"
-                :key="i"
-                color="grey"
-                dark
-                class="ma-1"
-                close
-                @click:close="selection.splice(select, 1)"
+      <v-navigation-drawer app apppermanent expand-on-hover mini-variant-width="5" width="50%">
+        <v-row style="height: 100%;overflow: hidden">
+          <v-col style="overflow-y: scroll; height: 100%">
+            <v-card-text style="overflow: auto">
+              <v-treeview
+                v-model="selection"
+                :items="items"
+                selected-color="green darken-4"
+                open-on-click
+                selectable
+                return-object
+                expand-icon="mdi-chevron-down"
+                on-icon="mdi-bookmark"
+                off-icon="mdi-bookmark-outline"
+                indeterminate-icon="mdi-bookmark-minus"
               >
-                {{ select.name }}
-              </v-chip>
-            </v-scroll-x-transition>
-          </v-card-text>
-        </v-col>
-      </v-row>
-    </v-navigation-drawer>
+              </v-treeview>
+            </v-card-text>
+          </v-col>
 
-    <l-map
-      v-if="showMap"
-      :zoom="zoom"
-      :center="center"
-      :options="mapOptions"
-      style="height: 92.5%; width: 98.1%; position: fixed"
-    >
-      <l-tile-layer
-        :url="url"
-        :attribution="attribution"
-      />
-      <map_marker v-for="marker in markers" :marker="marker" :key="marker.properties.name"></map_marker>
+          <v-divider vertical></v-divider>
 
-    </l-map>
+          <v-col cols="12" md="6">
+            <v-card-text class="sticky">
+              <div v-if="selection.length === 0" key="title" class="title font-weight-light grey--text pa-4 text-center">
+                Select your favorite breweries
+              </div>
+              <div v-else key="title" class="title font-weight-light grey--text pa-4 text-center">
+                Your favorite breweries
+              </div>
+              <v-scroll-x-transition group hide-on-leave>
+                <v-chip
+                  v-for="(select, i) in selection"
+                  :key="i"
+                  color="grey"
+                  dark
+                  class="ma-1"
+                  close
+                  @click:close="selection.splice(select, 1)"
+                >
+                  {{ select.name }}
+                </v-chip>
+              </v-scroll-x-transition>
+            </v-card-text>
+          </v-col>
+        </v-row>
+      </v-navigation-drawer>
 
-    <v-navigation-drawer app apppermanent expand-on-hover mini-variant-width="5" width="400" right>
-    </v-navigation-drawer>
+      <l-map
+        v-if="showMap"
+        :zoom="zoom"
+        :center="center"
+        :options="mapOptions"
+        style="height: 92.5%; width: 98.1%; position: fixed"
+      >
+        <l-tile-layer
+          :url="url"
+          :attribution="attribution"
+        />
+        <l-control position="topleft">
+    <button @click="flipActive">
+      {{ isActive ? 'Deactivate' : 'Activate' }}
+    </button>
+  </l-control>
+  <l-freedraw v-model="polygons" :mode="mode" />
 
-  </div>
+      </l-map>
+
+      <v-navigation-drawer app apppermanent expand-on-hover mini-variant-width="5" width="400" right>
+      </v-navigation-drawer>
+
+    </div>
+
 </template>
 
 <script>
@@ -81,9 +87,10 @@ import {
   LTooltip,
   LFeatureGroup,
   LIcon,
+    LControl,
 } from 'vue2-leaflet';
-
-import map_marker from "../components/map_components/map_marker"
+import LFreedraw from 'vue2-leaflet-freedraw';
+import { NONE, ALL } from 'leaflet-freedraw';
 
 export default {
   name: "MapPage",
@@ -95,10 +102,13 @@ export default {
     LTooltip,
     LFeatureGroup,
     LIcon,
-    map_marker,
+    LControl,
+    LFreedraw,
   },
   data() {
     return {
+      polygons: [],
+      isActive: true,
       zoom: 7.2,
       center: latLng(53.514797, 28.619385),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -213,15 +223,23 @@ export default {
       ],
     };
   },
-  methods: {
+computed: {
+    mode() {
+      return this.isActive ? ALL: NONE;
+    }
   },
+  methods: {
+    flipActive() {
+      this.isActive = !this.isActive;
+    }
+  }
 };
 </script>
 
 <style>
 .sticky {
-   position: sticky;
-   top: 0;
-   z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 </style>

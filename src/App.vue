@@ -11,6 +11,18 @@
             About
           </v-tab>
         </v-tabs>
+          <v-text-field v-model="login" label="Name" required></v-text-field>
+
+          <v-text-field v-model="password" label="password" required></v-text-field>
+
+
+          <v-btn
+            color="error"
+            class="mr-4"
+            @click="loginInSystem"
+          >
+            login
+          </v-btn>
       </template>
     </v-app-bar>
 
@@ -24,11 +36,29 @@
 </template>
 
 <script>
+const axios = require('axios').default;
+// axios.defaults.xsrfHeaderName = "X-CSRFToken"
+// axios.defaults.xsrfCookieName = 'csrftoken'
+// axios.defaults.withCredentials = true
+
 export default {
   name: 'App',
   data: () => ({
       tab: null,
+    login: '',
+    password: '',
   }),
+  methods: {
+    loginInSystem(){
+      axios.post('http://127.0.0.1:8000/auth/login/', {
+        login: this.login,
+        password: this.password
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+    }
+  }
 };
 </script>
 
